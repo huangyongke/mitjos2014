@@ -60,6 +60,23 @@ int
 mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 {
 	// Your code here.
+	struct	Eipdebuginfo temp;
+	int *cur_ebp;
+	int *pre_ebp;
+	int eip;
+	cur_ebp = (int*)read_ebp();
+	cprintf("Stark backtrace:\n");
+	int i;
+	while(cur_ebp!=0){
+		pre_ebp = (int*)cur_ebp;
+		eip = * (cur_ebp+1);
+		cprintf("ebp %x eip %x args %08x %08x %08x %08x %08x\n",cur_ebp,*(cur_ebp+1), *(cur_ebp+2), *(cur_ebp+3),*(cur_ebp+4),*(cur_ebp+5), *(cur_ebp+6));
+		debuginfo_eip(eip,&temp);
+		cprintf("%s:%d: %.*s+%d\n", temp.eip_file,temp.eip_line,temp.eip_fn_namelen,temp.eip_fn_name,eip - temp.eip_fn_addr);
+		if(!pre_ebp)
+			break;
+		cur_ebp = (int*)*pre_ebp;
+	}
 	return 0;
 }
 
